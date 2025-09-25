@@ -33,9 +33,13 @@ To run with different parameters:
 python3 chladni.py --bc neumann --N 100 --modes 9 --skip 10 --save
 ```
 
-where `N` is mesh size, `modes` is number of modes, and `skip` is the number of initial modes to skip. 
+where 
 
-The `--save` flag saves the modes separately to a folder `plots`.
+- `bc` are boundary conditions, either `neumann` or `dirichlet`
+- `N` is mesh size
+- `modes` is number of modes
+-`skip` is the number of initial modes to skip
+- `--save` flag saves the modes separately to a folder `plots`
 
 # Chladni Mode Simulation
 
