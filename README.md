@@ -19,15 +19,27 @@ python3 -m venv ~/.virtualenvs/math
 source ~/.virtualenvs/math/bin/activate
 ```
 
-Then simply run the script to produce plots:
+Then simply run the script to produce plots with default parameters (skip the first 10 modes):
 
 ```sh
 python3 chlandi.py
 ```
 
+To run with different parameters:
+
+```sh
+python3 chladni.py --bc neumann --N 100 --modes 9 --skip 10 --save
+```
+
+where `N` is mesh size, `modes` is number of modes, and `skip` is the number of initial modes to skip. 
+
+The `--save` flag saves the modes separately to a folder `plots`.
+
 # Chladni Mode Simulation
 
 This project simulates **Chladni figures** (the vibrational modes of plates) using finite differences in Python.
+
+![Chladni Modes](plots/chladni_modes.png)
 
 ---
 

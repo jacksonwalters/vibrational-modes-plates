@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from scipy.sparse import diags, kron, eye, csr_matrix
 from scipy.sparse.linalg import eigsh
 import argparse
+import os
 
 # --- 1D Laplacian ---
 def laplacian_1d(N, dx, bc="dirichlet"):
@@ -31,6 +32,7 @@ if __name__ == "__main__":
     parser.add_argument("--N", type=int, default=80, help="Grid points per axis")
     parser.add_argument("--modes", type=int, default=9, help="Number of modes to display")
     parser.add_argument("--skip", type=int, default=10, help="Number of lowest modes to skip")
+    parser.add_argument("--save", action="store_true", help="Save plots to ./plots folder")
     args = parser.parse_args()
 
     N = args.N
@@ -54,14 +56,27 @@ if __name__ == "__main__":
     vecs = vecs[:, skip:]
     modes = [vecs[:, i].reshape((n, n)) for i in range(num_modes)]
 
-    # Plotting
+    # --- Grid for plotting ---
     X, Y = np.meshgrid(np.linspace(0, L, n), np.linspace(0, L, n))
+
+    # --- Prepare output folder ---
+    if args.save:
+        os.makedirs("plots", exist_ok=True)
+
+    # --- Plotting ---
     fig, axes = plt.subplots(3, 3, figsize=(9, 9))
     axes = axes.ravel()
     for i, ax in enumerate(axes):
         ax.contour(X, Y, modes[i], levels=[0], colors='k')
         ax.set_title(f"Mode {i+1}")
         ax.axis('off')
+        if args.save:
+            # Save each mode separately
+            fig_single, ax_single = plt.subplots()
+            ax_single.contour(X, Y, modes[i], levels=[0], colors='k')
+            ax_single.axis('off')
+            fig_single.savefig(f"plots/mode_{i+1}.png", bbox_inches='tight', dpi=150)
+            plt.close(fig_single)
 
     plt.tight_layout()
     plt.show()
