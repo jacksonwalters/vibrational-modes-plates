@@ -38,7 +38,7 @@ where
 - `bc` are boundary conditions, either `neumann` or `dirichlet`
 - `N` is mesh size
 - `modes` is number of modes
--`skip` is the number of initial modes to skip
+- `skip` is the number of initial modes to skip
 - `--save` flag saves the modes separately to a folder `plots`
 
 # Chladni Mode Simulation
