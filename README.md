@@ -1,7 +1,5 @@
 # vibrational-modes-plates
 
-# Chladni Mode Simulation
-
 This project simulates **Chladni figures** (the vibrational modes of plates and membranes) using finite differences in Python.
 
 ---

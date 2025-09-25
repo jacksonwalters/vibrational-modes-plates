@@ -1,47 +1,46 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.linalg import eigh
+from scipy.sparse import diags, kron, eye
+from scipy.sparse.linalg import eigsh
 
 # Parameters
-N = 50   # grid resolution
-L = 1.0  # plate length (square domain)
+N = 80            # grid points per axis (higher = finer patterns)
+L = 1.0
+num_modes = 9     # number of modes to display
+skip = 10         # number of lowest modes to skip
 
-# Discretization
-x = np.linspace(0, L, N)
-y = np.linspace(0, L, N)
-dx = x[1] - x[0]
-dy = y[1] - y[0]
-X, Y = np.meshgrid(x, y, indexing="ij")
+# --- 1D Laplacian (Dirichlet BCs) ---
+def laplacian_1d(N, dx):
+    n = N - 2
+    main = -2 * np.ones(n)
+    off = np.ones(n - 1)
+    return diags([off, main, off], [-1, 0, 1]) / dx**2
 
-# Laplacian in 2D with Dirichlet boundary conditions
-def laplacian_2d(N, dx):
-    """Construct 2D Laplacian with Dirichlet BC on N x N grid."""
-    I = np.eye(N)
-    D = np.diag(-2*np.ones(N)) + np.diag(np.ones(N-1),1) + np.diag(np.ones(N-1),-1)
-    L1D = D / dx**2
-    # Kronecker sum
-    L2D = np.kron(I, L1D) + np.kron(L1D, I)
-    return L2D
+# --- Build 2D Laplacian ---
+n = N - 2
+dx = L / (N - 1)
+L1D = laplacian_1d(N, dx)
+I = eye(n)
+L2D = kron(I, L1D) + kron(L1D, I)
 
-# Build Laplacian
-L2D = laplacian_2d(N, dx)
+# --- Biharmonic operator (plate) ---
+B = L2D @ L2D
 
-# Solve eigenvalue problem: L u = λ u
-# We want the lowest few modes
-num_modes = 9
-vals, vecs = eigh(L2D)
+# --- Solve eigenproblem ---
+# Use shift-invert to get small eigenvalues if needed, or eigsh normally
+vals, vecs = eigsh(B, k=num_modes+skip, sigma=0, which='LM')
+vals = vals[skip:]
+vecs = vecs[:, skip:]
+modes = [vecs[:, i].reshape((n, n)) for i in range(num_modes)]
 
-# Pick the lowest positive eigenmodes
-modes = []
-for i in range(num_modes):
-    u = vecs[:, i].reshape(N, N)
-    modes.append(u)
-
-# Plot results
+# --- Plot ---
+X, Y = np.meshgrid(np.linspace(0, L, n), np.linspace(0, L, n))
 fig, axes = plt.subplots(3, 3, figsize=(9, 9))
-for ax, mode, val in zip(axes.ravel(), modes, vals[:num_modes]):
-    im = ax.contourf(X, Y, mode, levels=20, cmap="RdBu")
-    ax.set_title(f"λ = {val:.2f}")
-    ax.axis("off")
+axes = axes.ravel()
+for i, ax in enumerate(axes):
+    ax.contour(X, Y, modes[i], levels=[0], colors='k')
+    ax.set_title(f"Mode {i + 1}")
+    ax.axis('off')
+
 plt.tight_layout()
 plt.show()
